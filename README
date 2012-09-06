@@ -1,0 +1,99 @@
+Depix is a program to convert plots back into datasets.
+
+Despite the simplicity of Depix, it provides a very convenient work flow for
+transforming (scanned) plots back into (x,y) datasets.
+
+Depix was created on a standard Linux Desktop environment with Python, Numpy,
+Gimp, pdfimages, and Inkscape installed. I have only used it on such an
+environment. I do not bother to help you with running Depix on Windows or OSX.
+
+This program was written by Toon Verstraelen in Sep 2012 for the preparation of
+a paper with the title, "ACKS2: Atom-Condensed Kohn-Sham approximated to second
+order", in order to convert some plots of an old JCP paper into datasets for
+comparison with a newly proposed model.
+
+If you encounter troubles when using Depix, check the FAQ at the bottom of this
+file. If that does not solve your problem, feel free to get in touch:
+Toon.Verstraelen@UGent.be.
+
+
+Work flow
+=========
+
+1. If the plot is part of a pdf, use pdfimages to extract the figures from
+   the pdf as '.pbm' files.
+
+2. Open the image containing the plot with Gimp, crop it if needed and save the
+   file as a '.png' file.
+
+3. Open the '.png' file with Inkscape. Use the 'link' option to avoid large
+   '.svg' files in one of the following steps.
+
+4. Draw the x- and y-axis as two separate straight line segments, i.e. lines
+   with only a beginning and end node. The accuracy of the extracted data will
+   improve when these line segments are made as long as possible. However, make
+   sure the beginning and the end node lie at sensible points on the x- and
+   y-axis. Depix can handle cases where the x- and y-axis are not orthogonal or
+   rotated, e.g. due to a poor scan.
+
+5. Draw a polyline, consisting of straight line segments (not Bezier curves),
+   over the curve of interest. Make sure your drawing falls nicely over the
+   curve in the scanned image, as this will also determine the accuracy of the
+   final data. It may be helpful to use a bright colored and semi-transparant
+   line style.
+
+4. Open the XML window in Inkscape. Select the x-axis and change the id of the
+   path to "xaxis:x0:x1", where x0 and x1 are replaced by the numerical x-values
+   of the beginning and end points of the line segment for the x-axis. Do the
+   same for the y-axis, using the id "yaxis:y0:y1". The path with the datapoints
+   should be given the id "data".
+
+5. Use the "File -> Save as" menu item to save the file in '.svg' format.
+
+6. Run Depix as follows:
+
+    ./depix.py yourfile.svg yourdata.txt
+
+   Some screen output is given, which may be useful for debugging, if things
+   don't work out. The text file yourdata.txt contains two columns with x and y
+   data.
+
+This work flow has the advantage that all intermediate steps are saved in files,
+such that you can make incremental improvements. Furthermore, thanks to the neat
+graphical interface of Inkscape, one can make fairly accurate overlays of the
+data points on top of the scanned figure.
+
+If you need to extract more than one curve from a single plot, just copy the
+'.svg' file for the first curve to a new file and trace the second curve in
+this copy.
+
+
+Example
+=======
+
+An example '.svg' file, 'hf_135.svg' is distributed with the source code. It
+is converted to a dataset as follows:
+
+./depix.py hf_135.svg hf_135.txt
+
+
+FAQ
+===
+
+Q. I get errors when running Depix, e.g. like the following:
+
+Traceback (most recent call last):
+  File "./depix.py", line 177, in <module>
+    main()
+  File "./depix.py", line 170, in main
+    data = process_file(args[0])
+  File "./depix.py", line 159, in process_file
+    x_axis, y_axis, px_data = load_pix_data_svg(fn)
+  File "./depix.py", line 76, in load_pix_data_svg
+    px_data = parse_data(path)
+  File "./depix.py", line 56, in parse_data
+    x, y = word.split(',')
+ValueError: need more than 1 value to unpack
+
+A. Make sure the x- and y-axis are straight lines and the data polyline consists
+of straight line segments. This may happen when Bezier curves were used instead.
