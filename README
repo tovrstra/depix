@@ -97,3 +97,12 @@ ValueError: need more than 1 value to unpack
 
 A. Make sure the x- and y-axis are straight lines and the data polyline consists
 of straight line segments. This may happen when Bezier curves were used instead.
+
+
+Q. The data points are mirrored horizontally or vertically. How can I fix this?
+
+A. One must make sure that the order of the two points in the line segments for
+the x- and y-axis are compatible with the order of x0 and x1 in the path id
+"xaxis:x0:x1". One add an end marker in Inkscape to see clearly what the end
+point of the line segment is. With the menu item "Path -> Reverse path", one
+can swap begin and end.
