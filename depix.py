@@ -30,15 +30,22 @@ def load_pix_data_svg(fn):
     y_axis = None
     px_data = None
 
-    def parse_axis(name, path):
-        words = path.getAttribute('d').split()
-        assert len(words) == 3
-        assert words[0] == 'M'
+    def parse_svg_coordinates(s):
+        words = s.split()
         result = []
-        x, y = words[1].split(',')
-        result.append(np.array([float(x), float(y)]))
-        x, y = words[2].split(',')
-        result.append(np.array([float(x), float(y)]))
+        if words[0] != 'm' and  words[0] != 'M':
+            raise RuntimeError('Path data should either start with M or m.')
+        for word in words[1:]:
+            x, y = word.split(',')
+            row = np.array([float(x), float(y)])
+            if len(result) > 0 and words[0] == 'm':
+                row += result[-1]
+            result.append(row)
+        return result
+
+    def parse_axis(name, path):
+        result = parse_svg_coordinates(path.getAttribute('d'))
+        assert len(result) == 2
         words = name.split(':')
         result.append(float(words[1]))
         result.append(float(words[2]))
@@ -46,18 +53,10 @@ def load_pix_data_svg(fn):
             result.append(float(words[4]))
         else:
             result.append(1.0)
-        return np.array(result)
+        return result
 
     def parse_data(path):
-        words = path.getAttribute('d').split()
-        assert words[0] == 'm'
-        result = []
-        for word in words[1:]:
-            x, y = word.split(',')
-            row = np.array([float(x), float(y)])
-            if len(result) > 0:
-                row += result[-1]
-            result.append(row)
+        result = parse_svg_coordinates(path.getAttribute('d'))
         return np.array(result)
 
     from xml.dom.minidom import parse
