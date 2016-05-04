@@ -26,15 +26,15 @@ Release history
 Work flow
 =========
 
-1. If the plot is part of a pdf, use pdfimages to extract the figures from the pdf as
-   '.pbm' files. One can also use evince to extract bitmaps from a PDF: right click on the
-   image and "save image as".)
+1. If the plot is part of a pdf, use ``pdfimages`` to extract the figures from the PDF as
+   ``.pbm`` files. One can also use Evince to extract bitmaps from a PDF: right click on
+   the image and "Save Image As ...".
 
 2. Open the image containing the plot with Gimp, crop it if needed and save the file as a
-   '.png' file.
+   ``.png`` file.
 
-3. Open the '.png' file with Inkscape. Use the 'link' option to avoid large '.svg' files
-   in one of the following steps.
+3. Open the ``.png`` file with Inkscape. Use the "link" option to avoid large ``.svg``
+   files in one of the following steps.
 
 4. Draw the x- and y-axis as two separate straight line segments, i.e. lines with only a
    beginning and end node. The accuracy of the extracted data will improve when these line
@@ -48,40 +48,46 @@ Work flow
    use a bright colored and semi-transparent line style.
 
 4. Open the XML window in Inkscape. Select the x-axis and change the id of the path to
-   "xaxis:x0:x1:kind", where x0 and x1 are replaced by the numerical x-values of the
-   beginning and end points of the line segment for the x-axis. The last part, "kind",
-   must be replaced by "lin" or "log" for linear or logarithmic scales, respectively. Do
-   the same for the y-axis, using the id "yaxis:y0:y1:kind" and similar conventions. The
-   path with the datapoints should be given the id "data".
+   ``xaxis:x0:x1:kind``, where ``x0`` and ``x1`` are replaced by the numerical x-values of
+   the beginning and end points of the line segment for the x-axis. The last part,
+   ``kind``, must be replaced by ``lin`` or ``log`` for linear or logarithmic scales,
+   respectively. Do the same for the y-axis, using the id ``yaxis:y0:y1:kind``, following
+   the conventions. The path with the datapoints should be given the id "data".
 
-5. Use the "File -> Save as" menu item to save the file in '.svg' format.
+5. Use the "File" -> "Save as" menu item to save the file in ``.svg`` format.
 
 6. Run Depix as follows:
 
-    ./depix.py yourfile.svg yourdata.txt
+   .. code-block:: bash
+
+        ./depix.py yourfile.svg yourdata.txt
 
    Some screen output is given, which may be useful for debugging, if things don't work as
-   expected. The text file yourdata.txt contains two columns with x and y data.
+   expected. The text file ``yourdata.txt`` contains two columns with x and y data.
 
 This work flow has the advantage that all intermediate steps are saved in files, such that
 you can make incremental improvements. Furthermore, thanks to the neat graphical interface
 of Inkscape, one can make fairly accurate overlays of the data points on top of the
 scanned figure.
 
-If you need to extract more than one curve from a single plot, just copy the '.svg' file
-for the first curve to a new file and trace the second curve in this copy.
+If you need to extract more than one curve from a single plot, just copy the ``.svg`` file
+with the first curve to a new file and trace the second curve in this copy.
 
 
 Examples distributed with the source code
 =========================================
 
-The example 'hf_135.svg' comes from the paper http://dx.doi.org/10.1063/1.466016. The
+The example ``hf_135.svg``comes from the paper http://dx.doi.org/10.1063/1.466016. The
 figure is converted to a dataset as follows:
+
+.. code-block:: bash
 
     ./depix.py hf_135.svg hf_135.txt
 
-The example 'diffusion.svg' comes from the paper http://dx.doi.org/10.1016/j.molliq.2014.11.010.
+The example ``diffusion.svg`` comes from the paper http://dx.doi.org/10.1016/j.molliq.2014.11.010.
 figure is converted to a dataset as follows:
+
+.. code-block:: bash
 
     ./depix.py diffusion.svg diffusion.txt
 
@@ -89,29 +95,31 @@ figure is converted to a dataset as follows:
 FAQ
 ===
 
-Q. I get errors when running Depix, e.g. like the following:
+**Q.** I get errors when running Depix, e.g. like the following:
 
-Traceback (most recent call last):
-  File "./depix.py", line 177, in <module>
-    main()
-  File "./depix.py", line 170, in main
-    data = process_file(args[0])
-  File "./depix.py", line 159, in process_file
-    x_axis, y_axis, px_data = load_pix_data_svg(fn)
-  File "./depix.py", line 76, in load_pix_data_svg
-    px_data = parse_data(path)
-  File "./depix.py", line 56, in parse_data
-    x, y = word.split(',')
-ValueError: need more than 1 value to unpack
+.. code-block:: text
 
-A. Make sure the x- and y-axis are straight lines and the data polyline consists
-of straight line segments. This may happen when Bezier curves were used instead.
+    Traceback (most recent call last):
+      File "./depix.py", line 177, in <module>
+        main()
+      File "./depix.py", line 170, in main
+        data = process_file(args[0])
+      File "./depix.py", line 159, in process_file
+        x_axis, y_axis, px_data = load_pix_data_svg(fn)
+      File "./depix.py", line 76, in load_pix_data_svg
+        px_data = parse_data(path)
+      File "./depix.py", line 56, in parse_data
+        x, y = word.split(',')
+    ValueError: need more than 1 value to unpack
+
+**A.** Make sure the x- and y-axis are straight lines and the data polyline consists of
+straight line segments. This may happen when Bezier curves were used instead.
 
 
-Q. The data points are mirrored horizontally or vertically. How can I fix this?
+**Q.** The data points are mirrored horizontally or vertically. How can I fix this?
 
-A. One must make sure that the order of the two points in the line segments for
-the x- and y-axis are compatible with the order of x0 and x1 in the path id
-"xaxis:x0:x1". One add an end marker in Inkscape to see clearly what the end
-point of the line segment is. With the menu item "Path -> Reverse path", one
-can swap begin and end.
+**A.** One must make sure that the order of the two points in the line segments for the x-
+and y-axis are compatible with the order of ``x0`` and ``x1`` in the path id
+``xaxis:x0:x1:kind``. One may add an end marker in Inkscape to see clearly what the end
+point of the line segment is. With the menu item "Path" -> "Reverse path", one can swap
+begin and end.
