@@ -123,13 +123,13 @@
   <path
      style="fill:none;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0.75294117999999999;stroke-dasharray:none;marker-mid:none;marker-end:none"
      d="M 254.9841,477.98788 253.28646,6.8709029"
-     id="yaxis:0:5"
+     id="yaxis:0:5:lin"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path
      style="color:#000000;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0.75294117999999999;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;marker-start:none;marker-end:none"
      d="M 10.633732,479.07742 496.60789,477.06666"
-     id="xaxis:-1.0:1.0"
+     id="xaxis:-1.0:1.0:lin"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path

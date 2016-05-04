@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Depix is a program to convert plots back into datasets.
-# Copyright (C) 2012 Toon Verstraelen <Toon.Verstraelen@UGent.be>, Center
+# Copyright (C) 2016 Toon Verstraelen <Toon.Verstraelen@UGent.be>, Center
 # for Molecular Modeling (CMM), Ghent University, Ghent, Belgium; all rights
 # reserved unless otherwise stated.
 #
@@ -49,10 +49,7 @@ def load_pix_data_svg(fn):
         words = name.split(':')
         result.append(float(words[1]))
         result.append(float(words[2]))
-        if len(words) == 4:
-            result.append(float(words[4]))
-        else:
-            result.append(1.0)
+        result.append(str(words[3]))
         return result
 
     def parse_data(path):
@@ -80,40 +77,6 @@ def load_pix_data_svg(fn):
     return x_axis, y_axis, px_data
 
 
-def load_pix_data_txt(fn):
-    # Read lines, skipping comments and empty lines
-    # Each word should be a floating point number.
-    data = []
-    with open(fn) as f:
-        for line in f:
-            line = line[:line.find('#')].strip()
-            if len(line) > 0:
-                data.append([float(word) for word in line.split()])
-
-    # The first two following lines describe the x- and y-axis.
-    def parse_axis(row):
-        assert len(row) == 6 or len(row) == 7
-        px_low = np.array(row[:2])
-        px_high = np.array(row[2:4])
-        low = row[4]
-        high = row[5]
-        if len(row) == 7:
-            unit = row[6]
-        else:
-            unit = 1
-        return px_low, px_high, low, high, unit
-
-    x_axis = parse_axis(data[0])
-    y_axis = parse_axis(data[1])
-
-    # All the remaining lines are datapoints that need to be transformed.
-    px_data = np.array(data[2:])
-    assert len(px_data.shape) == 2
-    assert px_data.shape[1] == 2
-
-    return x_axis, y_axis, px_data
-
-
 def transform_px_data(x_axis, y_axis, px_data):
     # Print the pixel data on screen, useful for debugging.
     print 'X axis specs'
@@ -127,8 +90,8 @@ def transform_px_data(x_axis, y_axis, px_data):
     print
 
     # construct x- and y-unit vectors in pixel coordinates
-    px_xunit = (x_axis[1] - x_axis[0])/(x_axis[3] - x_axis[2])
-    px_yunit = (y_axis[1] - y_axis[0])/(y_axis[3] - y_axis[2])
+    px_xunit = (x_axis[1] - x_axis[0])
+    px_yunit = (y_axis[1] - y_axis[0])
 
     # the affine transformation to pixel coordinates
     mat_to_pix = np.array([px_xunit, px_yunit]).T
@@ -142,20 +105,28 @@ def transform_px_data(x_axis, y_axis, px_data):
 
     # transform the datapoints to data coordinates
     data = np.dot(mat_from_pix, px_data.T).T
-    data[:,0] -= x_low[0] - x_axis[2]
-    data[:,1] -= y_low[1] - y_axis[2]
+    data[:,0] -= x_low[0]
+    data[:,1] -= y_low[1]
 
-    # perform the unit conversion
-    data[:,0] *= x_axis[4]
-    data[:,0] *= y_axis[4]
+    def convert_unit(values, low, high, kind):
+        if kind == 'lin':
+            values[:] = values*(high-low) + low
+        elif kind == 'log':
+            llow = np.log(low)
+            lhigh = np.log(high)
+            values[:] = np.exp(values*(lhigh-llow) + llow)
+        else:
+            raise NotImplementedError
+
+    # convert to plot units
+    convert_unit(data[:,0], x_axis[2], x_axis[3], x_axis[4])
+    convert_unit(data[:,1], y_axis[2], y_axis[3], y_axis[4])
 
     return data
 
 
 def process_file(fn):
-    if fn.endswith('.txt'):
-        x_axis, y_axis, px_data = load_pix_data_txt(fn)
-    elif fn.endswith('.svg'):
+    if fn.endswith('.svg'):
         x_axis, y_axis, px_data = load_pix_data_svg(fn)
     else:
         raise RuntimeError('Unsopported extension for file %s' % fn)
@@ -164,7 +135,8 @@ def process_file(fn):
 
 def main():
     args = sys.argv[1:]
-    assert len(args) == 2
+    if len(args) != 2:
+        raise RuntimeError('Expecting two arguments: input.svg output.dat')
     print 'Processing data from %s' % args[0]
     print
     data = process_file(args[0])
