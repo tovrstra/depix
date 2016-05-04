@@ -52,13 +52,11 @@ Work flow
    the beginning and end points of the line segment for the x-axis. The last part,
    ``kind``, must be replaced by ``lin`` or ``log`` for linear or logarithmic scales,
    respectively. Do the same for the y-axis, using the id ``yaxis:y0:y1:kind``, following
-   the conventions. The path with the datapoints should be given the id "data".
+   the same conventions. The path with the datapoints should be given the id "data".
 
 5. Use the "File" -> "Save as" menu item to save the file in ``.svg`` format.
 
 6. Run Depix as follows:
-
-   .. code-block:: bash
 
         ./depix.py yourfile.svg yourdata.txt
 
@@ -80,14 +78,10 @@ Examples distributed with the source code
 The example ``hf_135.svg``comes from the paper http://dx.doi.org/10.1063/1.466016. The
 figure is converted to a dataset as follows:
 
-.. code-block:: bash
-
     ./depix.py hf_135.svg hf_135.txt
 
 The example ``diffusion.svg`` comes from the paper http://dx.doi.org/10.1016/j.molliq.2014.11.010.
 figure is converted to a dataset as follows:
-
-.. code-block:: bash
 
     ./depix.py diffusion.svg diffusion.txt
 
@@ -96,8 +90,6 @@ FAQ
 ===
 
 **Q.** I get errors when running Depix, e.g. like the following:
-
-.. code-block:: text
 
     Traceback (most recent call last):
       File "./depix.py", line 177, in <module>
