@@ -19,10 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 #
-#--
+# --
 
 
-import numpy as np, sys
+import numpy as np
+import sys
 
 
 def load_pix_data_svg(fn):
@@ -33,41 +34,42 @@ def load_pix_data_svg(fn):
     def parse_svg_coordinates(s):
         words = s.split()
         result = []
-        if words[0] != 'm' and  words[0] != 'M':
-            raise RuntimeError('Path data should either start with M or m.')
+        if words[0] != "m" and words[0] != "M":
+            raise RuntimeError("Path data should either start with M or m.")
         for word in words[1:]:
-            x, y = word.split(',')
+            x, y = word.split(",")
             row = np.array([float(x), float(y)])
-            if len(result) > 0 and words[0] == 'm':
+            if len(result) > 0 and words[0] == "m":
                 row += result[-1]
             result.append(row)
         return result
 
     def parse_axis(name, path):
-        result = parse_svg_coordinates(path.getAttribute('d'))
+        result = parse_svg_coordinates(path.getAttribute("d"))
         assert len(result) == 2
-        words = name.split(':')
+        words = name.split(":")
         result.append(float(words[1]))
         result.append(float(words[2]))
         result.append(str(words[3]))
         return result
 
     def parse_data(path):
-        result = parse_svg_coordinates(path.getAttribute('d'))
+        result = parse_svg_coordinates(path.getAttribute("d"))
         return np.array(result)
 
     from xml.dom.minidom import parse
+
     dom = parse(fn)
-    paths = dom.getElementsByTagName('path')
+    paths = dom.getElementsByTagName("path")
     for path in paths:
-        name = path.getAttribute('id')
-        if name.startswith('xaxis'):
+        name = path.getAttribute("id")
+        if name.startswith("xaxis"):
             assert x_axis is None
             x_axis = parse_axis(name, path)
-        elif name.startswith('yaxis'):
+        elif name.startswith("yaxis"):
             assert y_axis is None
             y_axis = parse_axis(name, path)
-        elif name.startswith('data'):
+        elif name.startswith("data"):
             assert px_data is None
             px_data = parse_data(path)
 
@@ -79,19 +81,19 @@ def load_pix_data_svg(fn):
 
 def transform_px_data(x_axis, y_axis, px_data):
     # Print the pixel data on screen, useful for debugging.
-    print 'X axis specs'
-    print x_axis
-    print
-    print 'Y axis specs'
-    print y_axis
-    print
-    print 'Pixel data points'
-    print px_data
-    print
+    print("X axis specs")
+    print(x_axis)
+    print()
+    print("Y axis specs")
+    print(y_axis)
+    print()
+    print("Pixel data points")
+    print(px_data)
+    print()
 
     # construct x- and y-unit vectors in pixel coordinates
-    px_xunit = (x_axis[1] - x_axis[0])
-    px_yunit = (y_axis[1] - y_axis[0])
+    px_xunit = x_axis[1] - x_axis[0]
+    px_yunit = y_axis[1] - y_axis[0]
 
     # the affine transformation to pixel coordinates
     mat_to_pix = np.array([px_xunit, px_yunit]).T
@@ -105,45 +107,45 @@ def transform_px_data(x_axis, y_axis, px_data):
 
     # transform the datapoints to data coordinates
     data = np.dot(mat_from_pix, px_data.T).T
-    data[:,0] -= x_low[0]
-    data[:,1] -= y_low[1]
+    data[:, 0] -= x_low[0]
+    data[:, 1] -= y_low[1]
 
     def convert_unit(values, low, high, kind):
-        if kind == 'lin':
-            values[:] = values*(high-low) + low
-        elif kind == 'log':
+        if kind == "lin":
+            values[:] = values * (high - low) + low
+        elif kind == "log":
             llow = np.log(low)
             lhigh = np.log(high)
-            values[:] = np.exp(values*(lhigh-llow) + llow)
+            values[:] = np.exp(values * (lhigh - llow) + llow)
         else:
             raise NotImplementedError
 
     # convert to plot units
-    convert_unit(data[:,0], x_axis[2], x_axis[3], x_axis[4])
-    convert_unit(data[:,1], y_axis[2], y_axis[3], y_axis[4])
+    convert_unit(data[:, 0], x_axis[2], x_axis[3], x_axis[4])
+    convert_unit(data[:, 1], y_axis[2], y_axis[3], y_axis[4])
 
     return data
 
 
 def process_file(fn):
-    if fn.endswith('.svg'):
+    if fn.endswith(".svg"):
         x_axis, y_axis, px_data = load_pix_data_svg(fn)
     else:
-        raise RuntimeError('Unsopported extension for file %s' % fn)
+        raise RuntimeError("Unsopported extension for file %s" % fn)
     return transform_px_data(x_axis, y_axis, px_data)
 
 
 def main():
     args = sys.argv[1:]
     if len(args) != 2:
-        raise RuntimeError('Expecting two arguments: input.svg output.dat')
-    print 'Processing data from %s' % args[0]
-    print
+        raise RuntimeError("Expecting two arguments: input.svg output.dat")
+    print("Processing data from %s" % args[0])
+    print()
     data = process_file(args[0])
 
     np.savetxt(args[1], data)
-    print 'Written data in plot units to %s' % args[1]
+    print("Written data in plot units to %s" % args[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

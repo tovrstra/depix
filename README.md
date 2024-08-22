@@ -1,3 +1,5 @@
+# Depix
+
 Depix is a program to convert plots back into datasets.
 
 Despite the simplicity of Depix, it provides a very convenient work flow for transforming
@@ -12,8 +14,7 @@ file. If that does not solve your problem, feel free to get in touch:
 Toon.Verstraelen@UGent.be.
 
 
-Release history
-===============
+## Release history
 
 * This program was written by Toon Verstraelen in Sep 2012 for the preparation of a paper
   with the title, "ACKS2: Atom-Condensed Kohn-Sham approximated to second order", in order
@@ -22,9 +23,10 @@ Release history
 
 * Support for logarithmic scales was added May 2016.
 
+* Cleanup and conversion to Python 3 (Aug 2024).
 
-Work flow
-=========
+
+## Work flow
 
 1. If the plot is part of a pdf, use ``pdfimages`` to extract the figures from the PDF as
    ``.pbm`` files. One can also use Evince to extract bitmaps from a PDF: right click on
@@ -72,8 +74,8 @@ If you need to extract more than one curve from a single plot, just copy the ``.
 with the first curve to a new file and trace the second curve in this copy.
 
 
-Examples distributed with the source code
-=========================================
+## Examples distributed with the source code
+
 
 The example ``hf_135.svg``comes from the paper http://dx.doi.org/10.1063/1.466016. The
 figure is converted to a dataset as follows:
