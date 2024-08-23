@@ -36,8 +36,20 @@ def load_pix_data_svg(fn):
         result = []
         if words[0] != "m" and words[0] != "M":
             raise RuntimeError("Path data should either start with M or m.")
+        mode = "m"
         for word in words[1:]:
-            x, y = word.split(",")
+            if word == "V":
+                mode = "v"
+                continue
+            if word == "H":
+                mode = "h"
+                continue
+            if mode == "m":
+                x, y = word.split(",")
+            elif mode == "v":
+                y = word
+            elif mode == "h":
+                x = word
             row = np.array([float(x), float(y)])
             if len(result) > 0 and words[0] == "m":
                 row += result[-1]
