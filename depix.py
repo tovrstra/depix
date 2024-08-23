@@ -31,11 +31,12 @@ def load_pix_data_svg(fn):
     y_axis = None
     px_data = None
 
-    def parse_svg_coordinates(s):
+    def parse_svg_coordinates(name, s):
+        print(f"Parsing coordinates id='{name}' path='{s}'")
         words = s.split()
         result = []
         if words[0] != "m" and words[0] != "M":
-            raise RuntimeError("Path data should either start with M or m.")
+            raise ValueError("Path data should either start with M or m.")
         mode = "m"
         for word in words[1:]:
             if word == "V":
@@ -44,21 +45,30 @@ def load_pix_data_svg(fn):
             if word == "H":
                 mode = "h"
                 continue
+            values = word.split(",")
             if mode == "m":
-                x, y = word.split(",")
+                if len(values) != 2:
+                    raise ValueError(f"Expecting two values after m, got {word}")
+                x = float(values[0])
+                y = float(values[1])
             elif mode == "v":
-                y = word
+                if len(values) != 1:
+                    raise ValueError(f"Expecting one value after v, got {word}")
+                y = float(values[0])
             elif mode == "h":
-                x = word
-            row = np.array([float(x), float(y)])
+                if len(values) != 1:
+                    raise ValueError(f"Expecting one value after h, got {word}")
+                x = float(values[0])
+            row = np.array([x, y])
             if len(result) > 0 and words[0] == "m":
                 row += result[-1]
             result.append(row)
         return result
 
     def parse_axis(name, path):
-        result = parse_svg_coordinates(path.getAttribute("d"))
-        assert len(result) == 2
+        result = parse_svg_coordinates(name, path.getAttribute("d"))
+        if len(result) != 2:
+            raise ValueError(f"Expected two points, got {len(result)} ({name})")
         words = name.split(":")
         result.append(float(words[1]))
         result.append(float(words[2]))
@@ -66,7 +76,7 @@ def load_pix_data_svg(fn):
         return result
 
     def parse_data(path):
-        result = parse_svg_coordinates(path.getAttribute("d"))
+        result = parse_svg_coordinates(name, path.getAttribute("d"))
         return np.array(result)
 
     from xml.dom.minidom import parse
@@ -76,18 +86,25 @@ def load_pix_data_svg(fn):
     for path in paths:
         name = path.getAttribute("id")
         if name.startswith("xaxis"):
-            assert x_axis is None
+            if x_axis is not None:
+                raise ValueError("X-axis defined twice.")
             x_axis = parse_axis(name, path)
         elif name.startswith("yaxis"):
-            assert y_axis is None
+            if y_axis is not None:
+                raise ValueError("X-axis defined twice.")
             y_axis = parse_axis(name, path)
         elif name.startswith("data"):
-            assert px_data is None
+            if px_data is not None:
+                raise ValueError("Data defined twice.")
             px_data = parse_data(path)
+    print()
 
-    assert x_axis is not None
-    assert y_axis is not None
-    assert px_data is not None
+    if x_axis is None:
+        raise ValueError("No x-axis found.")
+    if y_axis is None:
+        raise ValueError("No y-axis found.")
+    if px_data is None:
+        raise ValueError("No data points found.")
     return x_axis, y_axis, px_data
 
 
@@ -143,14 +160,14 @@ def process_file(fn):
     if fn.endswith(".svg"):
         x_axis, y_axis, px_data = load_pix_data_svg(fn)
     else:
-        raise RuntimeError("Unsopported extension for file %s" % fn)
+        raise ValueError("Unsopported extension for file %s" % fn)
     return transform_px_data(x_axis, y_axis, px_data)
 
 
 def main():
     args = sys.argv[1:]
     if len(args) != 2:
-        raise RuntimeError("Expecting two arguments: input.svg output.dat")
+        raise ValueError("Expecting two arguments: input.svg output.dat")
     print("Processing data from %s" % args[0])
     print()
     data = process_file(args[0])
