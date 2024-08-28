@@ -1,3 +1,10 @@
+:warning: :rotating_light: **This repository was archived on Aug 28, 2024.**
+
+Depix is no longer maintained. Consider using the [Unplot](https://reproducible-reporting.github.io/stepup-reprep/advanced_topics/unplot/) feature of [StepUp RepRep](https://reproducible-reporting.github.io/stepup-reprep/) instead.
+It follows a similar approach, has more features, is better tested and is better suited for large SVGs.
+
+---
+
 # Depix
 
 Depix is a program to convert plots back into datasets.
@@ -24,6 +31,8 @@ Toon.Verstraelen@UGent.be.
 * Support for logarithmic scales was added May 2016.
 
 * Cleanup and conversion to Python 3 (Aug 2024).
+
+* Archived repository (28 Aug 2024).
 
 
 ## Work flow
